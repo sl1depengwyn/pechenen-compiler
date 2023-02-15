@@ -2,7 +2,7 @@ defmodule Lexer.Token do
   @types ~w(atom liter operator)a
 
   @type t :: %__MODULE__{
-          value: String.t(),
+          value: String.t() | boolean() | integer() | float(),
           type: type()
         }
 
