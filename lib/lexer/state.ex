@@ -1,4 +1,3 @@
 defmodule Lexer.State do
-  @enforce_keys [:column, :line]
-  defstruct [:column, :line]
+  defstruct column: 1, line: 1
 end
