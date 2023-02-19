@@ -2,7 +2,7 @@
 Compiler for lisp-like language
 
 
-## Sove examples of code written in pechenen-lisp
+## Some examples of code written in pechenen-lisp
 
 ```go
 (func Fibonacci (n) (
