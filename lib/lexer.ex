@@ -2,14 +2,14 @@ defmodule Lexer do
   alias Lexer.Token
   alias Lexer.State
 
-  @delimeters [" ", ")", "\n"]
+  @delimiters [" ", ")", "\n"]
 
-  @spec parse(String.t()) :: {:error, String.t()} | {:ok, [Token.t()]}
-  def parse(code) when is_binary(code) do
+  @spec scan(String.t()) :: {:error, String.t()} | {:ok, [Token.t()]}
+  def scan(code) when is_binary(code) do
     do_parse(code, %State{}, [])
   end
 
-  def parse(code) do
+  def scan(code) do
     {:error, "For some reason argument of parse/1 function is not a string: #{inspect(code)}"}
   end
 
@@ -131,7 +131,7 @@ defmodule Lexer do
   end
 
   defp parse_integer(<<value::binary-size(1)>> <> _remain = code, acc)
-       when value in ["." | @delimeters] do
+       when value in ["." | @delimiters] do
     {acc, code}
   end
 
