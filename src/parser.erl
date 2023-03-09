@@ -2,8 +2,8 @@
 -export([parse/1, parse_and_scan/1, format_error/1]).
 -file("src/parser.yrl", 23).
 
-extract_liter(#{value := Value, type := liter}) -> Value.
-extract_atom(#{value := Value, type := atom}) -> Value.
+extract_token({Value, _liter, Line}) -> Value.
+% extract_atom({Value, atom, Line}) -> Value.
 -file("/Users/nikitosing/.asdf/installs/erlang/25.2.1/lib/parsetools-2.4.1/include/yeccpre.hrl", 0).
 %%
 %% %CopyrightBegin%
@@ -357,7 +357,7 @@ yeccpars2_6_(__Stack0) ->
 yeccpars2_7_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
-                  extract_atom(___1)
+                  extract_token(___1)
   end | __Stack].
 
 -compile({inline,yeccpars2_8_/1}).
@@ -367,7 +367,7 @@ yeccpars2_7_(__Stack0) ->
 yeccpars2_8_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
-                   extract_liter(___1)
+                   extract_token(___1)
   end | __Stack].
 
 -compile({inline,yeccpars2_9_/1}).

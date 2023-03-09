@@ -24,7 +24,7 @@ defmodule Lexer do
        )
        when value in ["(", ")", "'"] do
     do_parse(code, %{state | column: column + String.length(value)}, [
-      %Token{value: value, type: :operator, column: column, line: line} | acc
+      %Token{value: String.to_atom(value), type: :operator, column: column, line: line} | acc
     ])
   end
 

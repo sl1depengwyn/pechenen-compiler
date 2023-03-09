@@ -16,11 +16,11 @@ elements ->
 elements ->
   element elements : ['$1' | '$2'].
 
-element -> liter : extract_liter('$1').
-element -> atom : extract_atom('$1').
+element -> liter : extract_token('$1').
+element -> atom : extract_token('$1').
 element -> list : '$1'.
 
 Erlang code.
 
-extract_liter(#{value := Value, type := liter}) -> Value.
-extract_atom(#{value := Value, type := atom}) -> Value.
+extract_token({Value, _liter, Line}) -> Value.
+% extract_atom({Value, atom, Line}) -> Value.
