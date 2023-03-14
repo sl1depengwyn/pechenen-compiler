@@ -1,11 +1,16 @@
 Nonterminals 
-    list elements element
-    .
-Terminals
-    atom liter '(' ')' operator
+    list elements element function_call quote
     .
 
-Rootsymbol list.
+Terminals
+    atom liter '(' ')' '\''
+    .
+
+Rootsymbol function_call.
+
+function_call -> list : make_list_node('$1').
+
+quote -> '\'' element : '$2'.
 
 list -> '(' ')' : [].
 list -> '(' elements ')' : '$2'.
@@ -18,9 +23,11 @@ elements ->
 
 element -> liter : extract_token('$1').
 element -> atom : extract_token('$1').
+element -> quote : '$1'.
 element -> list : '$1'.
 
 Erlang code.
 
-extract_token({Value, _liter, Line}) -> Value.
-% extract_atom({Value, atom, Line}) -> Value.
+extract_token({_Type, Value, _Line, _Column}) -> Value.
+
+make_list_node([Element | T]) -> {Element, T}.
