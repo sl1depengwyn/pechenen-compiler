@@ -2,9 +2,11 @@
 -export([parse/1, parse_and_scan/1, format_error/1]).
 -file("src/parser.yrl", 27).
 
-extract_token({_Type, Value, _Line, _Column}) -> Value.
+extract_token({_Type, #{value := Value, line := Line, column := Column}}) -> #{value => Value, line => Line, column => Column}.
+make_empty_list({_Type, #{line := Line, column := Column}}) -> #{value => [], line => Line, column => Column}.
 
-make_list_node([Element | T]) -> {Element, T}.
+make_list_node([Element | T]) -> {Element, T};
+make_list_node(#{value := [], line := Line, column := Column}) -> return_error([{line, Line}, {column, Column}], "Unexpected (). If you want to define an empty list use `quote` function").
 
 -file("/Users/nikitosing/.asdf/installs/erlang/25.2.1/lib/parsetools-2.4.1/include/yeccpre.hrl", 0).
 %%
@@ -185,7 +187,7 @@ yecctoken2string1(Other) ->
 
 
 
--file("src/parser.erl", 188).
+-file("src/parser.erl", 190).
 
 -dialyzer({nowarn_function, yeccpars2/7}).
 -compile({nowarn_unused_function,  yeccpars2/7}).
@@ -400,7 +402,7 @@ yeccpars2_7_(__Stack0) ->
 yeccpars2_8_(__Stack0) ->
  [___2,___1 | __Stack] = __Stack0,
  [begin
-                  []
+                  make_empty_list(___1)
   end | __Stack].
 
 -compile({inline,yeccpars2_9_/1}).
@@ -454,4 +456,4 @@ yeccpars2_13_(__Stack0) ->
   end | __Stack].
 
 
--file("src/parser.yrl", 32).
+-file("src/parser.yrl", 34).

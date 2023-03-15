@@ -3,7 +3,9 @@ defmodule Lexer.Token do
 
   @type t :: %__MODULE__{
           value: String.t() | boolean() | integer() | float() | atom(),
-          type: type()
+          type: type(),
+          line: non_neg_integer(),
+          column: non_neg_integer()
         }
 
   @typep type ::
