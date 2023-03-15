@@ -1,20 +1,16 @@
 Nonterminals 
-    list elements element function_call
+   list elements element
     .
 
 Terminals
     atom liter '(' ')' '\''
     .
 
-Rootsymbol list.
+Rootsymbol elements.
 
-% function_call -> list : make_list_node('$1').
-% function_call -> '\'' element : make_list_node([quote | ['$2']]).
-
-list -> '(' ')' : make_list_node(make_empty_list('$1')).
+list -> '(' ')' : make_empty_list('$1').
 list -> '(' elements ')' : make_list_node('$2').
 list -> '\'' element : make_list_node([quote | ['$2']]).
-% list -> function_call : '$1'.
 
 elements ->
   element : ['$1'].
