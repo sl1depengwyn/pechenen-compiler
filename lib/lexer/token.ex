@@ -1,9 +1,11 @@
 defmodule Lexer.Token do
-  @types ~w(atom liter operator)a
+  @types ~w(atom liter \( \) \' )a
 
   @type t :: %__MODULE__{
           value: String.t() | boolean() | integer() | float() | atom(),
-          type: type()
+          type: type(),
+          line: non_neg_integer(),
+          column: non_neg_integer()
         }
 
   @typep type ::
@@ -13,6 +15,6 @@ defmodule Lexer.Token do
              |> Enum.join(" | ")
              |> Code.string_to_quoted!()
            )
-  @enforce_keys [:value, :type, :column, :line]
+  @enforce_keys [:type, :column, :line]
   defstruct [:value, :type, :column, :line]
 end

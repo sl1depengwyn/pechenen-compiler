@@ -2,14 +2,14 @@ defmodule Lexer do
   alias Lexer.Token
   alias Lexer.State
 
-  @delimeters [" ", ")", "\n"]
+  @delimiters [" ", ")", "\n"]
 
-  @spec parse(String.t()) :: {:error, String.t()} | {:ok, [Token.t()]}
-  def parse(code) when is_binary(code) do
+  @spec scan(String.t()) :: {:error, String.t()} | {:ok, [Token.t()]}
+  def scan(code) when is_binary(code) do
     do_parse(code, %State{}, [])
   end
 
-  def parse(code) do
+  def scan(code) do
     {:error, "For some reason argument of parse/1 function is not a string: #{inspect(code)}"}
   end
 
@@ -24,7 +24,7 @@ defmodule Lexer do
        )
        when value in ["(", ")", "'"] do
     do_parse(code, %{state | column: column + String.length(value)}, [
-      %Token{value: value, type: :operator, column: column, line: line} | acc
+      %Token{type: String.to_atom(value), column: column, line: line} | acc
     ])
   end
 
@@ -90,10 +90,8 @@ defmodule Lexer do
 
   defp parse_number(code, acc \\ "")
 
-  defp parse_number(<<value::binary-size(1)>> <> remain = code, acc)
+  defp parse_number(<<value::binary-size(1)>> <> remain = code, _acc)
        when value in ~w(0 1 2 3 4 5 6 7 8 9 + -) do
-    IO.inspect({code, acc}, label: "95")
-
     {sign, number} =
       case value do
         sign when sign in ~w(+ -) -> {sign, remain}
@@ -109,8 +107,6 @@ defmodule Lexer do
   end
 
   defp parse_number("." <> remain, acc) do
-    IO.inspect({remain, acc}, label: "111")
-
     case parse_integer(remain) do
       {integer, "." <> _remain = code} -> {:error, code, acc <> "." <> integer}
       {integer, remain} -> {acc <> "." <> integer, remain}
@@ -119,7 +115,6 @@ defmodule Lexer do
   end
 
   defp parse_number(remain, acc) do
-    IO.inspect({remain, acc}, label: "120")
     {acc, remain}
   end
 
@@ -131,7 +126,7 @@ defmodule Lexer do
   end
 
   defp parse_integer(<<value::binary-size(1)>> <> _remain = code, acc)
-       when value in ["." | @delimeters] do
+       when value in ["." | @delimiters] do
     {acc, code}
   end
 

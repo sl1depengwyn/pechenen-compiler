@@ -24,3 +24,6 @@ pechenen_compiler-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# OS-generated files
+.DS_Store
