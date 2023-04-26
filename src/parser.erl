@@ -4,9 +4,6 @@
 
 extract_token({'\'', #{value := _Value, line := Line, column := Column}}) -> #{value => quote, line => Line, column => Column};
 extract_token({_Type, #{value := Value, line := Line, column := Column}}) -> #{value => Value, line => Line, column => Column}.
-make_empty_list({_Type, #{line := Line, column := Column}}) -> #{value => [], line => Line, column => Column}.
-
-make_list_node([Element | T]) -> {Element, T}.
 
 -file("/Users/nikitosing/.asdf/installs/erlang/25.2.1/lib/parsetools-2.4.1/include/yeccpre.hrl", 0).
 %%
@@ -187,7 +184,7 @@ yecctoken2string1(Other) ->
 
 
 
--file("src/parser.erl", 190).
+-file("src/parser.erl", 187).
 
 -dialyzer({nowarn_function, yeccpars2/7}).
 -compile({nowarn_unused_function,  yeccpars2/7}).
@@ -392,7 +389,7 @@ yeccpars2_7_(__Stack0) ->
 yeccpars2_9_(__Stack0) ->
  [___2,___1 | __Stack] = __Stack0,
  [begin
-                  make_empty_list(___1)
+                  []
   end | __Stack].
 
 -compile({inline,yeccpars2_10_/1}).
@@ -402,7 +399,7 @@ yeccpars2_9_(__Stack0) ->
 yeccpars2_10_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
-                           make_list_node(___2)
+                           ___2
   end | __Stack].
 
 -compile({inline,yeccpars2_11_/1}).
@@ -412,7 +409,7 @@ yeccpars2_10_(__Stack0) ->
 yeccpars2_11_(__Stack0) ->
  [___2,___1 | __Stack] = __Stack0,
  [begin
-                       make_list_node([extract_token(___1) | [___2]])
+                       [extract_token(___1), ___2]
   end | __Stack].
 
 -compile({inline,yeccpars2_12_/1}).
@@ -426,4 +423,4 @@ yeccpars2_12_(__Stack0) ->
   end | __Stack].
 
 
--file("src/parser.yrl", 32).
+-file("src/parser.yrl", 29).

@@ -70,7 +70,12 @@ defmodule Lexer do
        ) do
     {string_value, remain} = parse_atom(code)
 
-    type = if string_value in ~w(true false null), do: :liter, else: :atom
+    type =
+      if string_value in ~w(true false null) do
+        :liter
+      else
+        :atom
+      end
 
     do_parse(remain, %{state | column: column + String.length(string_value)}, [
       %Token{value: String.to_atom(string_value), type: type, column: column, line: line} | acc
