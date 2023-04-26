@@ -1,10 +1,9 @@
 defmodule Parser do
   alias Parser.Node
+  alias Lexer.Token
 
-  @spec parse(binary) :: {:error, any} | {:ok, Node.t()}
-  def parse(string) do
-    {:ok, tokens} = Lexer.scan(string)
-
+  @spec parse([Token.t()]) :: {:error, any} | {:ok, [Node.t()]}
+  def parse(tokens) do
     :parser.parse(Enum.map(tokens, fn token -> {token.type, token} end))
   end
 end
