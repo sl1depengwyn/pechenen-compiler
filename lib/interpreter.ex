@@ -4,18 +4,41 @@ defmodule Interpreter do
   @spec interpret(ast: [Node.t()]) :: any()
   def interpret(ast) do
     {:ok,
-     Enum.reduce(ast, initial_state(), fn node, acc ->
+     Enum.reduce(ast, {nil, initial_state()}, fn node, {_value, acc} ->
        {value, state} = interpret_node(node, acc)
        IO.inspect(value, label: "value")
-       state
+       {value, state}
      end)}
   end
 
   def initial_state do
     %{
-      scope: arithmetic_functions(),
+      scope: arithmetic_functions() |> Map.merge(comparisons_functions()),
       service: %{line: 0, column: 0}
     }
+  end
+
+  def comparisons_functions do
+    [
+      equal: &Kernel.==/2,
+      nonequal: &Kernel.!=/2,
+      less: &Kernel.</2,
+      lesseq: &Kernel.<=/2,
+      greater: &Kernel.>/2,
+      greatereq: &Kernel.>=/2
+    ]
+    |> Map.new(fn {name, func} ->
+      {name,
+       {[:a, :b],
+        fn
+          %{scope: %{a: a, b: b}}
+          when (is_boolean(a) or is_number(a)) and (is_boolean(b) or is_number(b)) ->
+            func.(a, b)
+
+          %{service: %{line: line, column: column}} ->
+            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers"
+        end}}
+    end)
   end
 
   def arithmetic_functions do
@@ -64,8 +87,26 @@ defmodule Interpreter do
     end
   end
 
-  def interpret_node([%{} = node_value | _], _state, _return_state?) do
-    raise {:error, "Illegal function name", node_value}
+  def interpret_node([[_ | _] = node | children], state, return_state?) do
+    func_name = interpret_node(node, state, false)
+
+    {value, state} =
+      interpret_function_call(
+        %{line: state.service.line, column: state.service.column, value: func_name},
+        children,
+        state
+      )
+
+    if return_state? do
+      {value, state}
+    else
+      value
+    end
+  end
+
+  def interpret_node(i, state, _return_state?) do
+    IO.inspect(i, label: "134134234")
+    raise "Error in Ln #{state.service.line}, Col #{state.service.column}: Illegal function name"
   end
 
   def interpret_function_call(
@@ -140,23 +181,13 @@ defmodule Interpreter do
     do_cond(value, [condition, then_clause, else_clause], state)
   end
 
-  defp do_cond(
-         %{value: :cond, line: line, column: column},
-         [condition, then_clause, else_clause],
-         state
-       ) do
-    condition = interpret_node(condition, state, false)
-
-    unless is_boolean(condition) do
-      raise "Error in Ln #{line}, Col #{column}: cond expects first argument to be boolean, got: #{condition}"
-    end
-
-    if condition do
-      interpret_node(then_clause, state)
-    else
-      interpret_node(then_clause, state)
-    end
-  end
+  # def interpret_function_call(
+  #       %{value: :while} = value,
+  #       [condition, then_clause, else_clause],
+  #       state
+  #     ) do
+  #   do_cond(value, [condition, then_clause, else_clause], state)
+  # end
 
   def interpret_function_call(%{value: :eval}, [arg], state) do
     # TODO check if here we need state or not
@@ -167,7 +198,27 @@ defmodule Interpreter do
     raise "Error in Ln #{line}, Col #{column}: #{:quote}/#{length(args)} is not defined"
   end
 
-  def interpret_function_call(%{value: function_name, line: line, column: column}, args, state) do
+  def interpret_function_call(
+        %{value: {func_args, function}, line: _line, column: _column},
+        args,
+        state
+      ) do
+    with {:number_of_args, true} <- {:number_of_args, length(args) == length(func_args)} do
+      {args
+       |> Enum.map(&interpret_node(&1, state, false))
+       |> Enum.zip(func_args)
+       |> Enum.reduce(state, fn {val, arg_name}, state ->
+         put_in(state, [:scope, arg_name], val)
+       end)
+       |> function.(), state}
+    else
+      _ ->
+        raise "Error in Ln #{state.service.line}, Col #{state.service.column}: lambda_function/#{length(args)} is not defined"
+    end
+  end
+
+  def interpret_function_call(%{value: function_name, line: line, column: column}, args, state)
+      when is_atom(function_name) do
     with {func_args, function} <- state.scope[function_name],
          {:number_of_args, true} <- {:number_of_args, length(args) == length(func_args)} do
       {args
@@ -185,12 +236,32 @@ defmodule Interpreter do
     end
   end
 
+  def interpret_function_call(i, _args, state) do
+    IO.inspect(i, label: "fucnoitiknjrnf ")
+    raise "Error in Ln #{state.service.line}, Col #{state.service.column}: Illegal function name"
+  end
+
+  defp do_cond(
+         %{value: :cond, line: line, column: column},
+         [condition, then_clause, else_clause],
+         state
+       ) do
+    condition = interpret_node(condition, state, false)
+
+    unless is_boolean(condition) do
+      raise "Error in Ln #{line}, Col #{column}: cond expects first argument to be boolean, got: #{condition}"
+    end
+
+    if condition do
+      interpret_node(then_clause, state)
+    else
+      interpret_node(else_clause, state)
+    end
+  end
+
   defp take_value(%{value: value}), do: value
 
   defp take_value([%{value: value} | children]) do
     [value | Enum.map(children, &take_value/1)]
   end
 end
-
-
-# handle_function_call should handle not only list with nodes but with also just values (runtime generated) and also lambda should be valuable as function name
