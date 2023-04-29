@@ -35,8 +35,8 @@ defmodule Interpreter do
           when (is_boolean(a) or is_number(a)) and (is_boolean(b) or is_number(b)) ->
             func.(a, b)
 
-          %{service: %{line: line, column: column}} ->
-            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers"
+          %{service: %{line: line, column: column}, scope: %{a: a, b: b}} ->
+            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers or boolean, got #{a} and #{b}"
         end}}
     end)
   end
@@ -50,8 +50,8 @@ defmodule Interpreter do
           %{scope: %{a: a, b: b}} when is_number(a) and is_number(b) ->
             func.(a, b)
 
-          %{service: %{line: line, column: column}} ->
-            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers"
+          %{service: %{line: line, column: column}, scope: %{a: a, b: b}} ->
+            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers, got #{a} and #{b}"
         end}}
     end)
   end

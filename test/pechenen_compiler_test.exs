@@ -23,5 +23,17 @@ defmodule PechenenCompilerTest do
       assert {4, %{scope: %{fun: {[:a, :b], _}}}} =
                PechenenInterpreter.interpret("(setq fun (lambda '(a b) (plus a b))) (fun 1 3)")
     end
+
+    test "recursion" do
+      assert {5, _state} = PechenenInterpreter.interpret("""
+      (func Fibonacci '(n) (
+        cond (less n 2)
+          n
+          (plus (Fibonacci (minus n 1)) (Fibonacci (minus n 2))))
+      )
+
+      (Fibonacci 5)
+      """)
+    end
   end
 end

@@ -85,7 +85,7 @@ defmodule Lexer do
   defp parse_atom(code, acc \\ "")
 
   defp parse_atom(<<value::binary-size(1)>> <> remain, acc)
-       when value not in ["+", "-", " ", "'", "(", ")"] do
+       when value not in ["+", "-", " ", "'", "(", ")", "\n"] do
     parse_atom(remain, acc <> value)
   end
 
