@@ -1,0 +1,9 @@
+(func Fibonacci (n) (
+  cond (less n 2)
+    n
+    (plus (Fibonacci (minus n 1)) (Fibonacci (minus n 2))))
+)
+
+(prog (n)
+  (Fibonacci n)
+)
