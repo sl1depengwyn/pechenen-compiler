@@ -19,6 +19,18 @@ defmodule PechenenCompilerTest do
                PechenenInterpreter.interpret("(lambda '(p) (cond (less p 0) 'plus 'minus))")
     end
 
+    test "while" do
+      assert {0,
+              %{
+                scope: %{
+                  a: 0
+                }
+              }} =
+               PechenenInterpreter.interpret(
+                 "(setq a 5) (while (greater a 0) (setq a (minus a 1))) (cond (lesseq a 0) (print a))"
+               )
+    end
+
     test "setq lambda" do
       assert {4, %{scope: %{fun: {[:a, :b], _}}}} =
                PechenenInterpreter.interpret("(setq fun (lambda '(a b) (plus a b))) (fun 1 3)")

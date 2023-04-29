@@ -13,9 +13,24 @@ defmodule Interpreter do
 
   def initial_state do
     %{
-      scope: arithmetic_functions() |> Map.merge(comparisons_functions()),
+      scope:
+        arithmetic_functions() |> Map.merge(comparisons_functions()) |> Map.merge(io_functions()),
       service: %{line: 0, column: 0}
     }
+  end
+
+  def io_functions do
+    [
+      print: &IO.inspect/1
+    ]
+    |> Map.new(fn {name, func} ->
+      {name,
+       {[:a],
+        fn
+          %{scope: %{a: a}} ->
+            func.(a)
+        end}}
+    end)
   end
 
   def comparisons_functions do
@@ -181,17 +196,36 @@ defmodule Interpreter do
     do_cond(value, [condition, then_clause, else_clause], state)
   end
 
-  # def interpret_function_call(
-  #       %{value: :while} = value,
-  #       [condition, then_clause, else_clause],
-  #       state
-  #     ) do
-  #   do_cond(value, [condition, then_clause, else_clause], state)
-  # end
+  def interpret_function_call(%{value: :while} = value, [condition, body] = args, state) do
+    condition = interpret_node(condition, state, false)
+
+    unless is_boolean(condition) do
+      raise "Error in Ln #{state.service.line}, Col #{state.service.column}: cond expects first argument to be boolean, got: #{condition}"
+    end
+
+    if condition do
+      {_, state} = interpret_node(body, state)
+      interpret_function_call(value, args, state)
+    else
+      {nil, state}
+    end
+
+    # fun = fn -> interpret_node(body, state) end
+    # fn ->
+    #   condition = interpret_node(condition, state, false)
+    #   unless is_boolean(condition) do
+    #     raise "Error in Ln #{state.service.line}, Col #{state.service.column}: cond expects first argument to be boolean, got: #{condition}"
+    #   end
+    #   if condition do
+    #     fun()
+    #   end
+    # end
+    # do_cond(value, [condition, then_clause, else_clause], state)
+  end
 
   def interpret_function_call(%{value: :eval}, [arg], state) do
     # TODO check if here we need state or not
-    interpret_node(arg, state, false)
+    interpret_node(arg, state)
   end
 
   def interpret_function_call(%{value: :eval, line: line, column: column}, args, _state) do
