@@ -24,7 +24,7 @@ defmodule PechenenCompilerTest do
     end
 
     test "while" do
-      assert {nil,
+      assert {:null,
               %{
                 scope: %{
                   a: 0
@@ -56,7 +56,7 @@ defmodule PechenenCompilerTest do
     end
 
     test "return" do
-      assert {nil,
+      assert {:null,
               %{
                 scope: %{
                   a: 0
@@ -68,7 +68,7 @@ defmodule PechenenCompilerTest do
     end
 
     test "break" do
-      assert {nil,
+      assert {:null,
               %{
                 scope: %{
                   a: 0
@@ -94,5 +94,9 @@ defmodule PechenenCompilerTest do
     # test "return on the top level" do
     #   assert {5, _state} = PechenenInterpreter.interpret("(return 5) (return 6)")
     # end
+
+    test "isnull" do
+      assert {true, _state} = PechenenInterpreter.interpret("(prog () (isnull 'null))")
+    end
   end
 end

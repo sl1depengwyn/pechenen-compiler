@@ -4,10 +4,8 @@ defmodule Interpreter do
   @spec interpret([Node.t()], [String.t() | integer()]) :: any()
   def interpret(ast, args) do
     {_value, state} =
-      Enum.reduce(ast, {nil, initial_state()}, fn node, {_value, acc} ->
-        {value, state} = interpret_node(node, acc)
-        IO.inspect(value, label: "value")
-        {value, state}
+      Enum.reduce(ast, {:null, initial_state()}, fn node, {_value, acc} ->
+        interpret_node(node, acc)
       end)
 
     {:ok,
@@ -35,7 +33,10 @@ defmodule Interpreter do
         arithmetic_functions()
         |> Map.merge(comparisons_functions())
         |> Map.merge(io_functions())
-        |> Map.merge(default_atoms()),
+        |> Map.merge(default_atoms())
+        |> Map.merge(logical_operations())
+        |> Map.merge(predicates())
+        |> Map.merge(list_operations()),
       service: %{line: 0, column: 0, returned?: false}
     }
   end
@@ -52,6 +53,78 @@ defmodule Interpreter do
             func.(a)
         end}}
     end)
+  end
+
+  def list_operations do
+    [
+      head: &Kernel.hd/1,
+      tail: &Kernel.tl/1
+    ]
+    |> Map.new(fn {name, func} ->
+      {name,
+       {[:a],
+        fn
+          %{scope: %{a: a}} when is_list(a) ->
+            func.(a)
+
+          %{service: %{line: line, column: column}, scope: %{a: a}} ->
+            raise "Error in Ln #{line}, Col #{column}: #{name} argument should be list, got #{a}"
+        end}}
+    end)
+    |> Map.merge(%{
+      cons:
+        {[:a, :b],
+         fn
+           %{scope: %{a: a, b: b}} when is_list(b) ->
+             [a | b]
+
+           %{service: %{line: line, column: column}, scope: %{a: _a, b: b}} ->
+             raise "Error in Ln #{line}, Col #{column}: The second :cons argument should be list, got #{b}"
+         end}
+    })
+  end
+
+  def predicates do
+    [
+      isint: &Kernel.is_integer/1,
+      isreal: &Kernel.is_float/1,
+      isbool: &Kernel.is_boolean/1,
+      isnull: fn a -> a == :null end,
+      isatom: &Kernel.is_atom/1,
+      islist: &Kernel.is_list/1
+    ]
+    |> Map.new(fn {name, func} ->
+      {name,
+       {[:a],
+        fn
+          %{scope: %{a: a}} -> func.(a)
+        end}}
+    end)
+  end
+
+  def logical_operations do
+    [
+      and: &Kernel.&&/2,
+      or: &Kernel.||/2,
+      xor: &xor/2,
+      not: &Kernel.not/1
+    ]
+    |> Map.new(fn {name, func} ->
+      {name,
+       {[:a, :b],
+        fn
+          %{scope: %{a: a, b: b}}
+          when is_boolean(a) and is_boolean(b) ->
+            func.(a, b)
+
+          %{service: %{line: line, column: column}, scope: %{a: a, b: b}} ->
+            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be boolean, got #{a} and #{b}"
+        end}}
+    end)
+  end
+
+  def xor(a, b) do
+    (!a && b) || (a && !b)
   end
 
   def comparisons_functions do
@@ -93,7 +166,7 @@ defmodule Interpreter do
   end
 
   def default_atoms do
-    %{true: true, false: false, null: nil}
+    %{true: true, false: false, null: :null}
   end
 
   def interpret_node(node, state, return_state? \\ true)
@@ -144,8 +217,7 @@ defmodule Interpreter do
     end
   end
 
-  def interpret_node(i, state, _return_state?) do
-    IO.inspect(i, label: "134134234")
+  def interpret_node(_, state, _return_state?) do
     raise "Error in Ln #{state.service.line}, Col #{state.service.column}: Illegal function name"
   end
 
@@ -156,7 +228,7 @@ defmodule Interpreter do
       interpret_node(body, state, false)
     end
 
-    {nil, put_in(state, [:scope, name], {args, func})}
+    {:null, put_in(state, [:scope, name], {args, func})}
   end
 
   def interpret_function_call(%{value: :quote}, [arg], state) do
@@ -165,7 +237,7 @@ defmodule Interpreter do
 
   def interpret_function_call(%{value: :setq}, [%{value: atom}, element], state)
       when is_atom(atom) do
-    {nil, put_in(state, [:scope, atom], interpret_node(element, state, false))}
+    {:null, put_in(state, [:scope, atom], interpret_node(element, state, false))}
   end
 
   def interpret_function_call(
@@ -187,7 +259,7 @@ defmodule Interpreter do
   end
 
   def interpret_function_call(%{value: :cond} = value, [condition, then_clause], state) do
-    do_cond(value, [condition, then_clause, %{value: nil}], state)
+    do_cond(value, [condition, then_clause, %{value: :null}], state)
   end
 
   def interpret_function_call(
@@ -209,12 +281,12 @@ defmodule Interpreter do
       {_, state} = interpret_node(body, state)
       interpret_function_call(value, args, state)
     else
-      {nil, state}
+      {:null, state}
     end
   end
 
   def interpret_function_call(%{value: :break}, [], state) do
-    {nil, put_in(state, [:service, :broken?], true)}
+    {:null, put_in(state, [:service, :broken?], true)}
   end
 
   def interpret_function_call(%{value: :return}, [arg], state) do
@@ -236,7 +308,7 @@ defmodule Interpreter do
       interpret_node(body, state)
     end
 
-    {nil, put_in(state, [:service, :prog], {args, prog})}
+    {:null, put_in(state, [:service, :prog], {args, prog})}
   end
 
   def interpret_function_call(
@@ -277,8 +349,7 @@ defmodule Interpreter do
     end
   end
 
-  def interpret_function_call(i, _args, state) do
-    IO.inspect(i, label: "fucnoitiknjrnf ")
+  def interpret_function_call(_, _args, state) do
     raise "Error in Ln #{state.service.line}, Col #{state.service.column}: Illegal function name"
   end
 

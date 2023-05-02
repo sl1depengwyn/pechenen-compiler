@@ -2,6 +2,12 @@
   "cSpell.words": [
     "escript",
     "greatereq",
+    "isatom",
+    "isbool",
+    "isint",
+    "islist",
+    "isnull",
+    "isreal",
     "lesseq",
     "Pechenen",
     "setq"

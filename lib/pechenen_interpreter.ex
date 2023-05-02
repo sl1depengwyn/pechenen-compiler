@@ -7,8 +7,9 @@ defmodule PechenenInterpreter do
     case args |> Enum.map(&parse_arg/1) do
       [filename | program_args] ->
         source = File.read!(filename)
-        {value, _state} = interpret(source, program_args)
+        {value, state} = interpret(source, program_args)
         IO.puts(to_string(value))
+        {value, state}
 
       _ ->
         raise "No source filename provided"
@@ -17,9 +18,9 @@ defmodule PechenenInterpreter do
 
   def interpret(source, args \\ []) do
     with {:lexer, {:ok, tokens}} <- {:lexer, Lexer.scan(source)},
-         {:parser, {:ok, ast}} <- {:parser, Parser.parse(tokens) |> IO.inspect(label: "ast")},
+         {:parser, {:ok, ast}} <- {:parser, Parser.parse(tokens)} |> IO.inspect(label: "ast"),
          {:interpreter, {:ok, result}} <- {:interpreter, Interpreter.interpret(ast, args)} do
-      IO.inspect(result, label: "hererer")
+      result
     end
   end
 
