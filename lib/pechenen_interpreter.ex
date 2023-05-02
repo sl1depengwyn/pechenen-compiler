@@ -8,7 +8,7 @@ defmodule PechenenInterpreter do
       [filename | program_args] ->
         source = File.read!(filename)
         {value, state} = interpret(source, program_args)
-        IO.puts(to_string(value))
+        IO.inspect(value)
         {value, state}
 
       _ ->

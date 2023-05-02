@@ -68,7 +68,7 @@ defmodule Interpreter do
             func.(a)
 
           %{service: %{line: line, column: column}, scope: %{a: a}} ->
-            raise "Error in Ln #{line}, Col #{column}: #{name} argument should be list, got #{a}"
+            raise "Error in Ln #{line}, Col #{column}: #{name} argument should be list, got #{inspect a}"
         end}}
     end)
     |> Map.merge(%{
@@ -79,7 +79,7 @@ defmodule Interpreter do
              [a | b]
 
            %{service: %{line: line, column: column}, scope: %{a: _a, b: b}} ->
-             raise "Error in Ln #{line}, Col #{column}: The second :cons argument should be list, got #{b}"
+             raise "Error in Ln #{line}, Col #{column}: The second :cons argument should be list, got #{inspect b}"
          end}
     })
   end
@@ -118,7 +118,7 @@ defmodule Interpreter do
             func.(a, b)
 
           %{service: %{line: line, column: column}, scope: %{a: a, b: b}} ->
-            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be boolean, got #{a} and #{b}"
+            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be boolean, got #{inspect a} and #{inspect b}"
         end}}
     end)
   end
@@ -145,7 +145,7 @@ defmodule Interpreter do
             func.(a, b)
 
           %{service: %{line: line, column: column}, scope: %{a: a, b: b}} ->
-            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers or boolean, got #{a} and #{b}"
+            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers or boolean, got #{inspect a} and #{inspect b}"
         end}}
     end)
   end
@@ -160,7 +160,7 @@ defmodule Interpreter do
             func.(a, b)
 
           %{service: %{line: line, column: column}, scope: %{a: a, b: b}} ->
-            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers, got #{a} and #{b}"
+            raise "Error in Ln #{line}, Col #{column}: Both #{name} arguments should be numbers, got #{inspect a} and #{inspect b}"
         end}}
     end)
   end
