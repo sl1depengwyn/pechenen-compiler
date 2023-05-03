@@ -10,6 +10,7 @@ defmodule PechenenInterpreter do
         {value, state} = interpret(source, program_args)
         value |> pretty_print() |> IO.puts()
         {value, state}
+
       _ ->
         raise "No source filename provided"
     end

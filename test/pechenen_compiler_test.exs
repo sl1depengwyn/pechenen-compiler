@@ -91,7 +91,7 @@ defmodule PechenenCompilerTest do
       assert {5, _state} = PechenenInterpreter.main(["test/fixture/golden.plisp", "5"])
     end
 
-    test "from file" do
+    test "from file 1" do
       assert {5, _state} = PechenenInterpreter.main(["test/fixture/constructAsc.plisp", "5"])
     end
 
