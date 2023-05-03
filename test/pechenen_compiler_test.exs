@@ -91,6 +91,10 @@ defmodule PechenenCompilerTest do
       assert {5, _state} = PechenenInterpreter.main(["test/fixture/golden.plisp", "5"])
     end
 
+    test "from file" do
+      assert {5, _state} = PechenenInterpreter.main(["test/fixture/constructAsc.plisp", "5"])
+    end
+
     # test "return on the top level" do
     #   assert {5, _state} = PechenenInterpreter.interpret("(return 5) (return 6)")
     # end
