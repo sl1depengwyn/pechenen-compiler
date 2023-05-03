@@ -8,9 +8,8 @@ defmodule PechenenInterpreter do
       [filename | program_args] ->
         source = File.read!(filename)
         {value, state} = interpret(source, program_args)
-        IO.inspect(value)
+        value |> pretty_print() |> IO.puts()
         {value, state}
-
       _ ->
         raise "No source filename provided"
     end
@@ -42,5 +41,13 @@ defmodule PechenenInterpreter do
       float_remain == "" -> float_arg
       true -> arg
     end
+  end
+
+  defp pretty_print(val) when is_list(val) do
+    "(#{val |> Enum.map(&pretty_print/1) |> Enum.join(" ")})"
+  end
+
+  defp pretty_print(val) do
+    inspect(val)
   end
 end
