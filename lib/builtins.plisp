@@ -79,4 +79,3 @@
         init
         (reduce func (func init (head list)) (tail list))
 ))
-

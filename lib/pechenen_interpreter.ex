@@ -6,7 +6,7 @@ defmodule PechenenInterpreter do
   def main(args) do
     case args |> Enum.map(&parse_arg/1) do
       [filename | program_args] ->
-        source = File.read!(filename)
+        source = File.read!(filename) <> File.read!("lib/builtins.plisp")
         {value, state} = interpret(source, program_args)
         value |> pretty_print() |> IO.puts()
         {value, state}
