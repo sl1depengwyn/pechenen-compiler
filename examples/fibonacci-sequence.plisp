@@ -1,0 +1,18 @@
+(func addone (list) (
+    push 
+        (plus (get -1 list) 1) 
+        list
+))
+
+(func addfib (list) (
+    push 
+        (plus (get -1 list) (get -2 list))
+        list
+))
+
+// Returns a zip of indicies and corresponding fibonacci numbers
+(prog (n) (
+    zip 
+        (apply addone (minus n 1) '(1))
+        (apply addfib (minus n 2) '(0 1))
+))

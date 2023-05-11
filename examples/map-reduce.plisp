@@ -1,0 +1,15 @@
+(func addone (list) (
+    push 
+        (plus (get -1 list) 1) 
+        list
+))
+
+// Generates sum of first N squares
+(prog (n) (
+    reduce 
+        plus 
+        0 
+        (map 
+            (lambda (n) (times n n)) 
+            (apply addone (minus n 1) '(1)))
+))

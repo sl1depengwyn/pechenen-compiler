@@ -28,10 +28,12 @@
     _len list 0
 ))
 
-(func get (list index) (
-    cond (equal index 0)
-        (head list)
-        (get (tail list) (minus index 1))
+(func get (index list) (
+    cond (greatereq index 0)
+        (cond (equal index 0)
+            (head list)
+            (get (minus index 1) (tail list)))
+        (get (plus index (len list)) list)
 ))
 
 (func makelist1 (a) (
@@ -55,7 +57,7 @@
 (func _unzip (zipped list1 list2) (
     cond (isempty zipped)
         (makelist2 (reverse list1) (reverse list2))
-        (_unzip (tail zipped) (cons (get (head zipped) 0) list1) (cons (get (head zipped) 1) list2))
+        (_unzip (tail zipped) (cons (get 0 (head zipped)) list1) (cons (get 1 (head zipped)) list2))
 ))
 
 (func unzip (zipped) (
@@ -78,4 +80,24 @@
     cond (isempty list)
         init
         (reduce func (func init (head list)) (tail list))
+))
+
+(func _repeat (item times res) (
+    cond (lesseq times (len res))
+        res
+        (_repeat item times (cons item res))
+))
+
+(func repeat (item times) (
+    _repeat item times '()
+))
+
+(func push (item list) (
+    reverse (cons item (reverse list))
+))
+
+(func apply (func times init) (
+    cond (lesseq times 0)
+        init
+        (apply func (minus times 1) (func init))
 ))
