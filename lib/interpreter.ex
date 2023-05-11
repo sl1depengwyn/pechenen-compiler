@@ -34,7 +34,8 @@ defmodule Interpreter do
         |> Map.merge(comparisons_functions())
         |> Map.merge(io_functions())
         |> Map.merge(default_atoms())
-        |> Map.merge(logical_operations())
+        |> Map.merge(binary_logical_operations())
+        |> Map.merge(unary_logical_operations())
         |> Map.merge(predicates())
         |> Map.merge(list_operations()),
       service: %{line: 0, column: 0, returned?: false}
@@ -102,11 +103,8 @@ defmodule Interpreter do
     end)
   end
 
-  def logical_operations do
+  def binary_logical_operations do
     [
-      and: &Kernel.&&/2,
-      or: &Kernel.||/2,
-      xor: &xor/2,
       not: &Kernel.not/1
     ]
     |> Map.new(fn {name, func} ->
@@ -123,6 +121,23 @@ defmodule Interpreter do
     end)
   end
 
+  def unary_logical_operations do
+    [
+      not: &Kernel.not/1
+    ]
+    |> Map.new(fn {name, func} ->
+      {name,
+       {[:a],
+        fn
+          %{scope: %{a: a}}
+          when is_boolean(a) ->
+            func.(a)
+
+          %{service: %{line: line, column: column}, scope: %{a: a}} ->
+            raise "Error in Ln #{line}, Col #{column}: #{name} argument should be boolean, got #{inspect(a)}"
+        end}}
+    end)
+  end
   def xor(a, b) do
     (!a && b) || (a && !b)
   end
