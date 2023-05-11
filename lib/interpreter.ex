@@ -59,7 +59,8 @@ defmodule Interpreter do
   def list_operations do
     [
       head: &Kernel.hd/1,
-      tail: &Kernel.tl/1
+      tail: &Kernel.tl/1,
+      isempty: fn a -> length(a) == 0 end
     ]
     |> Map.new(fn {name, func} ->
       {name,
