@@ -1,0 +1,82 @@
+(func _reverse (list res) (
+    cond (isempty list)
+        res
+        (_reverse (tail list) (cons (head list) res))
+))
+
+(func reverse (list) (
+    _reverse list '()
+))
+
+(func _map (func list res) (
+    cond (isempty list)
+        (reverse res)
+        (_map func (tail list) (cons (func (head list)) res))
+))
+
+(func map (func list) (
+    _map func list '()
+))
+
+(func _len (list count) (
+    cond (isempty list)
+        count
+        (_len (tail list) (plus count 1))
+))
+
+(func len (list) (
+    _len list 0
+))
+
+(func get (list index) (
+    cond (equal index 0)
+        (head list)
+        (get (tail list) (minus index 1))
+))
+
+(func makelist1 (a) (
+    cons a '()
+))
+
+(func makelist2 (a b) (
+    cons a (makelist1 b)
+))
+
+(func _zip (list1 list2 res) (
+    cond (or (isempty list1) (isempty list2))
+        (reverse res)
+        (_zip (tail list1) (tail list2) (cons (makelist2 (head list1) (head list2)) res))
+))
+
+(func zip (list1 list2) (
+    _zip list1 list2 '()
+))
+
+(func _unzip (zipped list1 list2) (
+    cond (isempty zipped)
+        (makelist2 (reverse list1) (reverse list2))
+        (_unzip (tail zipped) (cons (get (head zipped) 0) list1) (cons (get (head zipped) 1) list2))
+))
+
+(func unzip (zipped) (
+    _unzip zipped '() '()
+))
+
+(func _filter (predicate list res) (
+    cond (isempty list)
+        (reverse res)
+        (cond (predicate (head list))
+            (_filter predicate (tail list) (cons (head list) res))
+            (_filter predicate (tail list) res))
+))
+
+(func filter (predicate list) (
+    _filter predicate list '()
+))
+
+(func reduce (func init list) (
+    cond (isempty list)
+        init
+        (reduce func (func init (head list)) (tail list))
+))
+

@@ -169,7 +169,7 @@ defmodule Interpreter do
   end
 
   def arithmetic_functions do
-    [plus: &Kernel.+/2, minus: &Kernel.-/2, times: &Kernel.*/2, divide: &Kernel.//2]
+    [plus: &Kernel.+/2, minus: &Kernel.-/2, times: &Kernel.*/2, divide: &Kernel.//2, remainder: &Kernel.rem/2]
     |> Map.new(fn {name, func} ->
       {name,
        {[:a, :b],
