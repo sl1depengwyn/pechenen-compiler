@@ -106,7 +106,9 @@ defmodule Interpreter do
 
   def binary_logical_operations do
     [
-      not: &Kernel.not/1
+      and: &Kernel.&&/2,
+      or: &Kernel.||/2,
+      xor: &xor/2
     ]
     |> Map.new(fn {name, func} ->
       {name,
