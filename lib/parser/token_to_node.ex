@@ -1,4 +1,4 @@
-defmodule Parser do
+defmodule Parser_improved do
   def tokens_to_nodes(tokens) do
     tokens
     |> Enum.map(&token_to_node/1)
